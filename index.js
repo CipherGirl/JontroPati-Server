@@ -27,6 +27,7 @@ async function run() {
     await client.connect();
     const userCollection = client.db('jontropati').collection('users');
     const productsCollection = client.db('jontropati').collection('products');
+    const ordersCollection = client.db('jontropati').collection('orders');
 
     //=========
     // Products
@@ -55,6 +56,31 @@ async function run() {
       };
       console.log(quantity);
       const result = await productsCollection.updateOne(filter, updateDoc);
+      res.status(200).send(result);
+    });
+
+    //========
+    // Orders
+    //========
+
+    app.get('/orders', async (req, res) => {
+      //const orders = await ordersCollection.find().toArray();
+      const query = { ...req.query };
+      console.log(query);
+      const userOrders = await ordersCollection.find(query).toArray();
+      res.status(200).send(userOrders);
+    });
+
+    app.post('/orders', async (req, res) => {
+      const order = req.body;
+      const result = await ordersCollection.insertOne(order);
+      res.status(200).send(result);
+    });
+
+    app.delete('/orders/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await ordersCollection.deleteOne(query);
       res.status(200).send(result);
     });
 
