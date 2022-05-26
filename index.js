@@ -14,7 +14,6 @@ app.use(cors());
 app.use(express.json());
 
 const uri = `mongodb+srv://${dbUserName}:${dbUserPassword}@cluster0.jrcuo.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri);
 
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -54,7 +53,6 @@ async function run() {
       const updateDoc = {
         $set: { quantity: quantity },
       };
-      console.log(quantity);
       const result = await productsCollection.updateOne(filter, updateDoc);
       res.status(200).send(result);
     });
@@ -66,7 +64,6 @@ async function run() {
     app.get('/orders', async (req, res) => {
       //const orders = await ordersCollection.find().toArray();
       const query = { ...req.query };
-      console.log(query);
       const userOrders = await ordersCollection.find(query).toArray();
       res.status(200).send(userOrders);
     });
@@ -89,7 +86,6 @@ async function run() {
     //======
 
     app.put('/user/:email', async (req, res) => {
-      console.log('Inside user/email');
       const email = req.params.email;
       const user = req.body;
       const filter = { email: email };
