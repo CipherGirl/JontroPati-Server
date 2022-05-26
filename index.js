@@ -28,6 +28,36 @@ async function run() {
     const userCollection = client.db('jontropati').collection('users');
     const productsCollection = client.db('jontropati').collection('products');
 
+    //=========
+    // Products
+    //=========
+
+    app.get('/products', async (req, res) => {
+      const query = {};
+      const cursor = productsCollection.find(query);
+      const products = await cursor.toArray();
+      res.status(200).send(products);
+    });
+
+    app.get('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const products = await productsCollection.findOne(query);
+      res.status(200).send(products);
+    });
+
+    app.put('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const quantity = req.body.quantity;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: { quantity: quantity },
+      };
+      console.log(quantity);
+      const result = await productsCollection.updateOne(filter, updateDoc);
+      res.status(200).send(result);
+    });
+
     //======
     // User
     //======
