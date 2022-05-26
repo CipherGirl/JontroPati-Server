@@ -4,7 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 
-const { dbUserName, dbUserPassword } = process.env;
+const { dbUserName, dbUserPassword, ACCESS_TOKEN_SECRET } = process.env;
 
 const port = process.env.PORT || '5000';
 
@@ -20,6 +20,23 @@ const client = new MongoClient(uri, {
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+
+const verifyJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res
+      .status(401)
+      .send({ message: 'User not authorized to access data' });
+  }
+  const token = authHeader.split(' ')[1];
+  jwt.verify(token, ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: 'Forbidden Access' });
+    }
+    req.decoded = decoded;
+    next();
+  });
+};
 
 async function run() {
   try {
@@ -61,11 +78,16 @@ async function run() {
     // Orders
     //========
 
-    app.get('/orders', async (req, res) => {
-      //const orders = await ordersCollection.find().toArray();
-      const query = { ...req.query };
-      const userOrders = await ordersCollection.find(query).toArray();
-      res.status(200).send(userOrders);
+    app.get('/orders', verifyJWT, async (req, res) => {
+      const authorization = req.headers.authorization;
+      const email = req.query.email;
+      if (email === req.decoded.email) {
+        const query = { ...req.query };
+        const userOrders = await ordersCollection.find(query).toArray();
+        return res.status(200).send(userOrders);
+      } else {
+        return res.status(403).send({ message: 'Forbidden Access' });
+      }
     });
 
     app.post('/orders', async (req, res) => {
@@ -94,11 +116,9 @@ async function run() {
         $set: user,
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
-      const token = jwt.sign(
-        { email: email },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '1h' }
-      );
+      const token = jwt.sign({ email: email }, ACCESS_TOKEN_SECRET, {
+        expiresIn: '1h',
+      });
       res.send({ result, token });
     });
   } finally {
