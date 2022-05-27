@@ -43,6 +43,18 @@ async function run() {
     const productsCollection = client.db('jontropati').collection('products');
     const ordersCollection = client.db('jontropati').collection('orders');
 
+    const verifyAdmin = async (req, res, next) => {
+      const requester = req.decoded.email;
+      const requesterAccount = await userCollection.findOne({
+        email: requester,
+      });
+      if (requesterAccount.role === 'admin') {
+        next();
+      } else {
+        res.status(403).send({ message: 'Forbidden Access' });
+      }
+    };
+
     //=========
     // Products
     //=========
@@ -117,23 +129,15 @@ async function run() {
       res.send({ admin: isAdmin });
     });
 
-    app.put('/user/admin/:email', verifyJWT, async (req, res) => {
+    app.put('/user/admin/:email', verifyJWT, verifyAdmin, async (req, res) => {
       const email = req.params.email;
       const role = req.body;
-      const requesterEmail = req.decoded.email;
-      const requesterAccount = await userCollection.findOne({
-        email: requesterEmail,
-      });
-      if (requesterAccount.role === 'admin') {
-        const filter = { email: email };
-        const updateDoc = {
-          $set: role,
-        };
-        const result = await userCollection.updateOne(filter, updateDoc);
-        res.status(200).send(result);
-      } else {
-        res.status(403).send({ message: 'Forbidden Access' });
-      }
+      const filter = { email: email };
+      const updateDoc = {
+        $set: role,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.status(200).send(result);
     });
 
     app.put('/user/:email', async (req, res) => {
