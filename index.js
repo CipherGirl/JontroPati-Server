@@ -66,6 +66,12 @@ async function run() {
       res.status(200).send(products);
     });
 
+    app.post('/products', verifyJWT, verifyAdmin, async (req, res) => {
+      const product = req.body;
+      const result = await productsCollection.insertOne(product);
+      res.send(result);
+    });
+
     app.get('/products/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
