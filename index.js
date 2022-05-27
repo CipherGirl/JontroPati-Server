@@ -90,11 +90,24 @@ async function run() {
       res.status(200).send(result);
     });
 
+    app.delete('/products/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await productsCollection.deleteOne(query);
+      res.status(200).send(result);
+    });
     //========
     // Orders
     //========
 
     app.get('/orders', verifyJWT, async (req, res) => {
+      const query = {};
+      const cursor = ordersCollection.find(query);
+      const orders = await cursor.toArray();
+      res.status(200).send(orders);
+    });
+
+    app.get('/orders/myorders', verifyJWT, async (req, res) => {
       const authorization = req.headers.authorization;
       const email = req.query.email;
       if (email === req.decoded.email) {
@@ -109,6 +122,17 @@ async function run() {
     app.post('/orders', async (req, res) => {
       const order = req.body;
       const result = await ordersCollection.insertOne(order);
+      res.status(200).send(result);
+    });
+
+    app.put('/orders/:id', async (req, res) => {
+      const id = req.params.id;
+      const deliveryStatus = req.body.deliveryStatus;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: { deliveryStatus: deliveryStatus },
+      };
+      const result = await ordersCollection.updateOne(filter, updateDoc);
       res.status(200).send(result);
     });
 
