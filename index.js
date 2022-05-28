@@ -107,6 +107,13 @@ async function run() {
       res.status(200).send(orders);
     });
 
+    app.get('/orders/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const order = await ordersCollection.findOne(query);
+      res.send(order);
+    });
+
     app.get('/orders/myorders', verifyJWT, async (req, res) => {
       const authorization = req.headers.authorization;
       const email = req.query.email;
