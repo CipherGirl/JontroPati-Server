@@ -114,7 +114,7 @@ async function run() {
       res.send(order);
     });
 
-    app.get('/orders/myorders', verifyJWT, async (req, res) => {
+    app.get('/myorders', verifyJWT, async (req, res) => {
       const authorization = req.headers.authorization;
       const email = req.query.email;
       if (email === req.decoded.email) {
