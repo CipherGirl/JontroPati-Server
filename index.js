@@ -3,6 +3,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 const { dbUserName, dbUserPassword, ACCESS_TOKEN_SECRET } = process.env;
 
@@ -42,6 +43,7 @@ async function run() {
     const userCollection = client.db('jontropati').collection('users');
     const productsCollection = client.db('jontropati').collection('products');
     const ordersCollection = client.db('jontropati').collection('orders');
+    const paymentsCollection = client.db('jontropati').collection('payments');
 
     const verifyAdmin = async (req, res, next) => {
       const requester = req.decoded.email;
@@ -143,6 +145,22 @@ async function run() {
       res.status(200).send(result);
     });
 
+    app.patch('/orders/:id', verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          paymentStatus: 'paid',
+          transactionId: payment.transactionId,
+        },
+      };
+
+      const result = await paymentsCollection.insertOne(payment);
+      const updatedOrder = await ordersCollection.updateOne(filter, updatedDoc);
+      res.send(updatedOrder);
+    });
+
     app.delete('/orders/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -187,9 +205,26 @@ async function run() {
       };
       const result = await userCollection.updateOne(filter, updateDoc, options);
       const token = jwt.sign({ email: email }, ACCESS_TOKEN_SECRET, {
-        expiresIn: '1h',
+        expiresIn: '1d',
       });
       res.send({ result, token });
+    });
+
+    //=======
+    //Payment
+    //=======
+
+    app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+      const order = req.body;
+      const price = order.price;
+      const amount = price * 100;
+      console.log(amount);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card'],
+      });
+      res.send({ clientSecret: paymentIntent.client_secret });
     });
   } finally {
     //await client.close();
