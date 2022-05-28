@@ -98,6 +98,7 @@ async function run() {
       const result = await productsCollection.deleteOne(query);
       res.status(200).send(result);
     });
+
     //========
     // Orders
     //========
@@ -177,6 +178,26 @@ async function run() {
       res.status(200).send(users);
     });
 
+    app.get('/user/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      console.log(email);
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      res.status(200).send(user);
+    });
+
+    app.patch('/user/:email', verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      const information = req.body;
+      const filter = { email: email };
+      const updateDoc = {
+        $set: information,
+      };
+      console.log(updateDoc);
+      const result = await userCollection.updateOne(filter, updateDoc);
+      res.status(200).send(result);
+    });
+
     app.get('/admin/:email', async (req, res) => {
       const email = req.params.email;
       const user = await userCollection.findOne({ email: email });
@@ -208,6 +229,19 @@ async function run() {
         expiresIn: '1d',
       });
       res.send({ result, token });
+    });
+
+    //=======
+    //Reviews
+    //=======
+    app.get('/review', async (req, res) => {
+      const users = await userCollection.find().toArray();
+      const review = users.map(({ name, rating, review }) => ({
+        name,
+        rating,
+        review,
+      }));
+      res.status(200).send(review);
     });
 
     //=======
