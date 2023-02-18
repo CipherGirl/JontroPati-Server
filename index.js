@@ -246,7 +246,9 @@ async function run() {
         rating,
         review,
       }));
-      res.status(200).send(review);
+
+      const filterRating = review.filter((item) => item.rating && item.review);
+      res.status(200).send(filterRating);
     });
 
     //=======
