@@ -2,7 +2,7 @@
 
 This is JontroPati, a manufacturer website of hand/electric tools and many more. We are tursted by thousands customers.
 
-## Project Live Url: <https://jontropati.web.app/>
+## Project Live Url: <https://jontropati-5e95d.web.app/>
 
 ## Features
 
