@@ -2,7 +2,7 @@
 
 This is JontroPati, a manufacturer website of hand/electric tools and many more. We are tursted by thousands customers.
 
-## Project Live Url: <https://jontropati.firebaseapp.com/>
+## Project Live Url: <https://jontropati.web.app/>
 
 ## Features
 
@@ -23,10 +23,10 @@ This is JontroPati, a manufacturer website of hand/electric tools and many more.
 - mongodb
 - stripe
 
-### Client Side
+### Client Side (Hosted by Firebase)
 
-- Link: <[https://github.com/programming-hero-web-course1/manufacturer-website-client-side-CipherGirl](https://github.com/CipherGirl/JontroPati-Client)>
+- Code Link: <https://github.com/CipherGirl/JontroPati-Client>
 
-### Server Side
+### Server Side (Hosted by Vercel)
 
-- Link: <[https://github.com/programming-hero-web-course1/manufacturer-website-server-side-CipherGirl](https://github.com/CipherGirl/JontroPati-Server)>
+- Code Link: <https://github.com/CipherGirl/JontroPati-Server>

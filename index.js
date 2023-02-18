@@ -44,7 +44,7 @@ const verifyJWT = (req, res, next) => {
 
 async function run() {
   try {
-    await client.connect();
+    client.connect();
     const userCollection = client.db('jontropati').collection('users');
     const productsCollection = client.db('jontropati').collection('products');
     const ordersCollection = client.db('jontropati').collection('orders');
@@ -279,3 +279,5 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log('Listening to port', port);
 });
+
+module.exports = app;
